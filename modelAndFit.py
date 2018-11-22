@@ -18,8 +18,8 @@ start_time = datetime.datetime.now()  # Log the start time
 img_width, img_height = 128, 128
 train_data_dir = 'output/Dataset2/TRAIN'
 validation_data_dir = 'output/Dataset2/VALIDATE'
-nb_train_samples = 53577
-nb_validation_samples = 11205
+nb_train_samples = 96503
+nb_validation_samples = 33964
 
 epochs = 30
 lamda = 5E-5
@@ -27,7 +27,7 @@ batch_size = 50
 
 # Set up TensorBoard
 callbacks = [TensorBoard(log_dir="logs/{}".format(time())),
-             EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=4, verbose=1, mode='auto', baseline=None,
+             EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=3, verbose=1, mode='auto', baseline=None,
                            restore_best_weights=False)]
 
 print(K.image_data_format())
