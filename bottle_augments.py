@@ -18,7 +18,7 @@ def label_horizontal_fold(img, amount=None, debug=None):
     thickness = random.randint(2, 3)
 
     start = random.randint(int(height * 0.2), int(height * 0.9))
-    end = start - random.randint(int(height * 0.05), int(height * 0.1))
+    end = start - random.randint(int(height * 0.05 * -1), int(height * 0.2))
     overlay = cv2.line(overlay, (0, start), (width, end), (255, 255, 255), thickness, cv2.LINE_AA)
     overlay = cv2.line(overlay, (0, start + 1), (width, end + 1), (100, 100, 100), thickness - 1, cv2.LINE_AA)
     cv2.addWeighted(overlay, opacity, img, 1 - opacity, 0, img)
@@ -50,6 +50,7 @@ def label_wringle(img):
     width = img.shape[1]
     length = random.randint(int(width * 0.1), int(width * 0.3))
     thickness = random.randint(2, 3)
+    startx = random.randint(0, int(width / 2))
     i = 0
     start = random.randint(int(height * 0.2), int(height * 0.9))
     end = start + random.randint(-7, 7)
@@ -59,9 +60,11 @@ def label_wringle(img):
         img[start - 1, length - i - 1] = img[start - 2, length - i]
         img[start - 2, length - i - 1] = img[start - 3, length - i]
 
-    overlay = cv2.line(overlay, (0, start - 1), (length, end - 1), (255, 255, 255), thickness, cv2.LINE_AA)
-    overlay = cv2.line(overlay, (0, start), (length, end), (255, 255, 255), thickness + 1, cv2.LINE_AA)
-    overlay = cv2.line(overlay, (0, start + 1), (length, end + 1), (150, 150, 150), thickness, cv2.LINE_AA)
+    overlay = cv2.line(overlay, (startx, start - 1), (startx + length, end - 1), (255, 255, 255), thickness,
+                       cv2.LINE_AA)
+    overlay = cv2.line(overlay, (startx, start), (startx + length, end), (255, 255, 255), thickness + 1, cv2.LINE_AA)
+    overlay = cv2.line(overlay, (startx, start + 1), (startx + length, end + 1), (150, 150, 150), thickness,
+                       cv2.LINE_AA)
     cv2.addWeighted(overlay, opacity, img, 1 - opacity, 0, img)
 
     return img
