@@ -2,13 +2,19 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
-from keras.callbacks import TensorBoard, EarlyStopping
+from keras.callbacks import TensorBoard, EarlyStopping, ModelCheckpoint
 from keras import backend as K
 from keras import regularizers
 from keras import layers
 from keras import optimizers
 import datetime
+import os
+import bottle_functions as bf
 from time import time
+
+epochs = 30
+lamda = 5E-5
+batch_size = 50
 
 # tensorboard --logdir=g:\BottleProject\logs
 
@@ -18,17 +24,17 @@ start_time = datetime.datetime.now()  # Log the start time
 img_width, img_height = 128, 128
 train_data_dir = 'output/Dataset2/TRAIN'
 validation_data_dir = 'output/Dataset2/VALIDATE'
-nb_train_samples = 96503
-nb_validation_samples = 33964
-
-epochs = 30
-lamda = 5E-5
-batch_size = 50
+nb_train_samples = sum(len(files) for _, _, files in os.walk(train_data_dir))
+nb_validation_samples = sum(len(files) for _, _, files in os.walk(validation_data_dir))
+experiment_name = "CNN_reseach4-3"
 
 # Set up TensorBoard
 callbacks = [TensorBoard(log_dir="logs/{}".format(time())),
-             EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=3, verbose=1, mode='auto', baseline=None,
-                           restore_best_weights=False)]
+             EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=2, verbose=1, mode='auto', baseline=None,
+                           restore_best_weights=False),
+             ModelCheckpoint(experiment_name + '.{epoch:02d}-{val_loss:.2f}.h5', monitor='val_loss', verbose=0,
+                             save_best_only=True, save_weights_only=True,
+                             mode='auto', period=1)]
 
 print(K.image_data_format())
 if K.image_data_format() == 'channels_first':
@@ -77,7 +83,7 @@ print(model.summary())
 
 ######DEFECT MODEL END######
 optimizer = optimizers.RMSprop(lr=0.0001, rho=0.9, epsilon=None, decay=0.0)
-#optimizer = optimizers.SGD(lr=0.01, momentum=0.9, decay=0.012, nesterov=False)
+# optimizer = optimizers.SGD(lr=0.01, momentum=0.9, decay=0.012, nesterov=False)
 
 model.compile(loss='binary_crossentropy', optimizer=optimizer, metrics=['accuracy'])  # org
 
@@ -87,12 +93,11 @@ train_datagen = ImageDataGenerator(rotation_range=5, width_shift_range=0.1, heig
 
 valid_datagen = ImageDataGenerator(rescale=1. / 255)
 
-
 train_generator = train_datagen.flow_from_directory(train_data_dir, target_size=(img_width, img_height),
                                                     batch_size=batch_size, class_mode='binary', shuffle=True)
 
 validation_generator = valid_datagen.flow_from_directory(validation_data_dir, target_size=(img_width, img_height),
-                                                        batch_size=batch_size, class_mode='binary', shuffle=True)
+                                                         batch_size=batch_size, class_mode='binary', shuffle=True)
 
 model.fit_generator(train_generator, steps_per_epoch=nb_train_samples // batch_size, epochs=epochs,
                     validation_data=validation_generator, validation_steps=nb_validation_samples // batch_size,
@@ -100,12 +105,12 @@ model.fit_generator(train_generator, steps_per_epoch=nb_train_samples // batch_s
 
 # serialize model to JSON
 model_json = model.to_json()
-with open("defect_cnn_box2.json", "w") as json_file:
+with open(experiment_name + ".json", "w") as json_file:
     json_file.write(model_json)
 
 # serialize weights to HDF5
-model.save_weights('defect_cnn_box2.h5')
+model.save_weights(experiment_name + '.h5')
 
-#Finish, and print execution time
+# Finish, and print execution time
 end_time = datetime.datetime.now()
 print("execution time: " + str(end_time - start_time))
