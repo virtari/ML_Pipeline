@@ -8,7 +8,7 @@ from tqdm import tqdm_gui
 import random
 
 # Parameters for pre-processing data
-iterations = 5  # How many rounds of random iterations per image (besides the original)
+iterations = 5  # How many rounds of random iterations per image (NOK) 
 ok_copies = 3  # How many OK copies to store
 
 target_size = 100  # target image size in % of original image
